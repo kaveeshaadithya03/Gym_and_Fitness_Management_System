@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Error - Fitness Hub</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+</head>
+<body>
+<div class="error-container">
+    <div class="dashboard-card error-card">
+        <h1 class="error-code" th:text="${status}">500</h1>
+        <h2 th:text="${error}">Error</h2>
+        <p th:text="${message}">Something went wrong. Please try again later.</p>
+        <a th:href="@{/}" class="btn-primary"><i class="fas fa-home"></i> Back to Home</a>
+    </div>
+</div>
+</body>
+</html>

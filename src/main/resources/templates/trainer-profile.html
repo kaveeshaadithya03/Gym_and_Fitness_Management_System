@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile - Fitness Hub</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+</head>
+<body>
+<div th:replace="~{fragments-navbar :: navbar('TRAINER')}"></div>
+
+<main class="dashboard">
+    <section class="dashboard-card" th:if="${trainer != null}">
+        <h2><i class="fas fa-user-circle"></i> My Profile</h2>
+        
+        <div class="profile-info">
+            <div class="info-grid">
+                <div class="info-item">
+                    <strong>Username:</strong>
+                    <p th:text="${trainer.user.username}">Username</p>
+                </div>
+                <div class="info-item">
+                    <strong>Email:</strong>
+                    <p th:text="${trainer.user.email}">Email</p>
+                </div>
+                <div class="info-item">
+                    <strong>Specialization:</strong>
+                    <p th:text="${trainer.specialization}">Specialization</p>
+                </div>
+                <div class="info-item">
+                    <strong>Location:</strong>
+                    <p th:text="${trainer.location}">Location</p>
+                </div>
+                <div class="info-item">
+                    <strong>Hourly Rate:</strong>
+                    <p th:text="'$' + ${#numbers.formatDecimal(trainer.hourlyRate, 1, 2)}">Rate</p>
+                </div>
+                <div class="info-item">
+                    <strong>Rating:</strong>
+                    <p th:text="${trainer.overallRating != null} ? ${#numbers.formatDecimal(trainer.overallRating, 1, 1)} + '/5' : 'No ratings yet'">Rating</p>
+                </div>
+                <div class="info-item">
+                    <strong>Status:</strong>
+                    <span th:class="'status status-' + ${trainer.approvalStatus.name().toLowerCase()}" th:text="${trainer.approvalStatus}">Status</span>
+                </div>
+            </div>
+            
+            <div class="info-item" th:if="${trainer.bio}">
+                <strong>Bio/Certifications:</strong>
+                <p th:text="${trainer.bio}">Bio</p>
+            </div>
+        </div>
+
+        <div class="actions">
+            <a th:href="@{/trainer/profile/edit}" class="btn btn-primary">
+                <i class="fas fa-edit"></i> Edit Profile
+            </a>
+            <a th:href="@{/trainer/dashboard}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Dashboard
+            </a>
+        </div>
+    </section>
+
+    <section class="dashboard-card" th:if="${trainer == null}">
+        <h2><i class="fas fa-exclamation-triangle"></i> Profile Not Found</h2>
+        <p>Your trainer profile has not been created yet.</p>
+        <a th:href="@{/trainer/profile/create}" class="btn btn-primary">Create Profile Now</a>
+    </section>
+</main>
+</body>
+</html>

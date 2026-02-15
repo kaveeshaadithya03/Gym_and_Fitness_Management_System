@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Bookings - Fitness Hub</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+</head>
+<body>
+<div th:replace="~{fragments-navbar :: navbar('MEMBER')}"></div>
+
+<main class="dashboard">
+    <section class="dashboard-card">
+        <h2><i class="fas fa-calendar-alt"></i> My Bookings</h2>
+        
+        <div class="actions">
+            <a th:href="@{/browse/trainers}" class="btn btn-primary">
+                <i class="fas fa-plus"></i>
+                <span>Book New Session</span>
+            </a>
+        </div>
+
+        <div th:if="${bookings.empty}" class="empty-state">
+            <div class="empty-state-icon">📅</div>
+            <div class="empty-state-text">No bookings yet</div>
+            <p>Book your first training session with our professional trainers!</p>
+            <a th:href="@{/browse/trainers}" class="btn btn-primary">
+                <i class="fas fa-dumbbell"></i>
+                <span>Browse Trainers</span>
+            </a>
+        </div>
+
+        <div th:unless="${bookings.empty}" class="bookings-list">
+            <div th:each="booking : ${bookings}" class="booking-card">
+                <div class="booking-header">
+                    <div class="booking-type">
+                        <i th:class="${booking.type.name() == 'TRAINING' ? 'fas fa-dumbbell' : 'fas fa-stethoscope'}"></i>
+                        <span th:text="${booking.type.name() == 'TRAINING' ? 'Training Session' : 'Doctor Consultation'}">Type</span>
+                    </div>
+                    <span th:class="'status status-' + ${#strings.toLowerCase(booking.status.name())}" 
+                          th:text="${#strings.capitalize(#strings.toLowerCase(booking.status.name()))}">Status</span>
+                </div>
+                <div class="booking-info">
+                    <h4 th:if="${booking.trainer != null}" th:text="${booking.trainer.user.username}">Trainer Name</h4>
+                    <h4 th:if="${booking.doctor != null}" th:text="${booking.doctor.user.username}">Doctor Name</h4>
+                    <p><i class="fas fa-calendar"></i> <span th:text="${#temporals.format(booking.dateTime, 'MMM dd, yyyy')}">Date</span></p>
+                    <p><i class="fas fa-clock"></i> <span th:text="${#temporals.format(booking.dateTime, 'hh:mm a')}">Time</span></p>
+                </div>
+                <div class="booking-actions">
+                    <!-- Cancel button for pending/confirmed bookings -->
+                    <form th:if="${booking.status.name() == 'PENDING' or booking.status.name() == 'CONFIRMED'}" 
+                          th:action="@{/bookings/{id}/cancel(id=${booking.id})}" 
+                          method="post" 
+                          style="display: inline;"
+                          onsubmit="return confirm('Are you sure you want to cancel this booking?');">
+                        <button type="submit" class="btn btn-sm btn-danger">
+                            <i class="fas fa-times"></i>
+                            <span>Cancel</span>
+                        </button>
+                    </form>
+                    
+                    <!-- Rate button for completed bookings -->
+                    <a th:if="${booking.status.name() == 'COMPLETED'}" 
+                       th:href="@{/ratings/form/{id}(id=${booking.id})}" 
+                       class="btn btn-sm btn-primary">
+                        <i class="fas fa-star"></i>
+                        <span>Rate Session</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+</body>
+</html>

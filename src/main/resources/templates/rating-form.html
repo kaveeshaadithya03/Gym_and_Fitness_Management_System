@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rate Session - Fitness Hub</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+</head>
+<body>
+<div th:replace="~{fragments-navbar :: navbar('MEMBER')}"></div>
+
+<main class="dashboard">
+    <section class="dashboard-card">
+        <h2><i class="fas fa-star"></i> Rate Your Session</h2>
+
+        <div th:if="${booking != null}">
+            <p>
+                <strong>Professional:</strong>
+                <span th:if="${booking.trainer != null}" th:text="${booking.trainer.user.firstName + ' (Trainer)'}"></span>
+                <span th:if="${booking.doctor != null}" th:text="${booking.doctor.user.firstName + ' (Doctor)'}"></span>
+            </p>
+            <p><strong>Date:</strong> <span th:text="${#temporals.format(booking.dateTime, 'dd MMM yyyy HH:mm')}"></span></p>
+
+            <form th:action="@{/ratings/submit}" method="post">
+                <input type="hidden" name="bookingId" th:value="${booking.id}">
+
+                <div class="form-group">
+                    <label>Your Rating</label>
+                    <div class="rating-stars">
+                        <input type="radio" id="star5" name="score" value="5" required>
+                        <label for="star5">★★★★★</label>
+                        <input type="radio" id="star4" name="score" value="4">
+                        <label for="star4">★★★★☆</label>
+                        <input type="radio" id="star3" name="score" value="3">
+                        <label for="star3">★★★☆☆</label>
+                        <input type="radio" id="star2" name="score" value="2">
+                        <label for="star2">★★☆☆☆</label>
+                        <input type="radio" id="star1" name="score" value="1">
+                        <label for="star1">★☆☆☆☆</label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="comment">Comments (optional)</label>
+                    <textarea id="comment" name="comment" rows="5" placeholder="Share your experience..."></textarea>
+                </div>
+
+                <button type="submit" class="btn-primary"><i class="fas fa-paper-plane"></i> Submit Rating</button>
+                <a th:href="@{/member/bookings}" class="btn-secondary">Cancel</a>
+            </form>
+        </div>
+    </section>
+</main>
+</body>
+</html>

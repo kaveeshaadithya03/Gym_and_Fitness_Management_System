@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Consultations - Doctor Dashboard</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+</head>
+<body>
+<div th:replace="~{fragments-navbar :: navbar('DOCTOR')}"></div>
+
+<main class="dashboard">
+    <div class="dashboard-card">
+        <h2><i class="fas fa-calendar-check"></i> My Consultations</h2>
+        <p>View and manage your scheduled appointments with members.</p>
+    </div>
+
+    <div class="dashboard-card">
+        <div th:if="${bookings.empty}" class="empty-state">
+            <div class="empty-state-icon">📅</div>
+            <div class="empty-state-text">No consultations scheduled</div>
+            <p style="color: #94a3b8; font-size: 0.9rem;">
+                Your upcoming consultations will appear here once members book appointments with you.
+            </p>
+        </div>
+
+        <div th:unless="${bookings.empty}" class="bookings-list">
+            <div th:each="booking : ${bookings}" class="booking-card">
+                <div class="booking-header">
+                    <div class="booking-type">
+                        <i class="fas fa-stethoscope"></i>
+                        <span>Doctor Consultation</span>
+                    </div>
+                    <span th:class="'status status-' + ${#strings.toLowerCase(booking.status.name())}" 
+                          th:text="${#strings.capitalize(#strings.toLowerCase(booking.status.name()))}">Status</span>
+                </div>
+                <div class="booking-info">
+                    <h4 th:text="${booking.member.user.username}">Member Name</h4>
+                    <p><i class="fas fa-calendar"></i> <span th:text="${#temporals.format(booking.dateTime, 'MMM dd, yyyy')}">Date</span></p>
+                    <p><i class="fas fa-clock"></i> <span th:text="${#temporals.format(booking.dateTime, 'hh:mm a')}">Time</span></p>
+                </div>
+                <div class="booking-actions">
+                    <form th:if="${booking.status.name() == 'PENDING'}" 
+                          th:action="@{/bookings/{id}/confirm(id=${booking.id})}" 
+                          method="post" 
+                          style="display: inline;">
+                        <button type="submit" class="btn btn-sm btn-primary">
+                            <i class="fas fa-check"></i> Confirm
+                        </button>
+                    </form>
+                    <form th:if="${booking.status.name() == 'CONFIRMED'}" 
+                          th:action="@{/bookings/{id}/complete(id=${booking.id})}" 
+                          method="post" 
+                          style="display: inline;">
+                        <button type="submit" class="btn btn-sm btn-primary">
+                            <i class="fas fa-check-double"></i> Complete
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="dashboard-card" style="background: rgba(79, 209, 197, 0.1); border: 1px solid rgba(79, 209, 197, 0.3);">
+        <h3><i class="fas fa-lightbulb"></i> Tips for Consultations</h3>
+        <ul style="line-height: 1.8; color: #e2e8f0;">
+            <li>Review member's health history before consultations</li>
+            <li>Prepare personalized meal plans based on their goals</li>
+            <li>Keep detailed notes for follow-up sessions</li>
+            <li>Encourage members to provide feedback after consultations</li>
+        </ul>
+    </div>
+</main>
+</body>
+</html>

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Booking Details - Fitness Hub</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+</head>
+<body>
+<div th:replace="~{fragments-navbar :: navbar('MEMBER')}"></div>
+
+<main class="dashboard">
+    <section class="dashboard-card" th:if="${booking != null}">
+        <h2><i class="fas fa-info-circle"></i> Booking Details</h2>
+
+        <div class="info-grid">
+            <div class="info-item">
+                <strong>ID:</strong>
+                <p th:text="${booking.id}"></p>
+            </div>
+            <div class="info-item">
+                <strong>Member:</strong>
+                <p th:text="${booking.member.user.firstName + ' ' + booking.member.user.lastName}"></p>
+            </div>
+            <div class="info-item" th:if="${booking.trainer != null}">
+                <strong>Trainer:</strong>
+                <p th:text="${booking.trainer.user.firstName + ' ' + booking.trainer.user.lastName}"></p>
+            </div>
+            <div class="info-item" th:if="${booking.doctor != null}">
+                <strong>Doctor:</strong>
+                <p th:text="${booking.doctor.user.firstName + ' ' + booking.doctor.user.lastName}"></p>
+            </div>
+            <div class="info-item">
+                <strong>Type:</strong>
+                <p th:text="${booking.type}"></p>
+            </div>
+            <div class="info-item">
+                <strong>Date & Time:</strong>
+                <p th:text="${#temporals.format(booking.dateTime, 'dd MMM yyyy HH:mm')}"></p>
+            </div>
+            <div class="info-item">
+                <strong>Status:</strong>
+                <span class="badge" th:classappend="${booking.status.name() == 'COMPLETED' ? 'badge-success' : booking.status.name() == 'PENDING' ? 'badge-warning' : 'badge-danger'}"
+                      th:text="${booking.status}"></span>
+            </div>
+        </div>
+
+        <div class="card-actions">
+            <a th:href="@{/member/bookings}" class="btn-secondary"><i class="fas fa-arrow-left"></i> Back</a>
+        </div>
+    </section>
+
+    <div th:if="${booking == null}" class="dashboard-card empty-state">
+        <h3><i class="fas fa-exclamation-triangle"></i> Booking Not Found</h3>
+        <a th:href="@{/member/bookings}" class="btn-primary">Back to Bookings</a>
+    </div>
+</main>
+</body>
+</html>

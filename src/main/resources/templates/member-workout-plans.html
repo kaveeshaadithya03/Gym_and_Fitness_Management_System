@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Workout Plans - Fitness Hub</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+</head>
+<body>
+    <div th:replace="~{fragments-navbar :: navbar('MEMBER')}"></div>
+
+    <main class="dashboard">
+        <div class="dashboard-card">
+            <h1><i class="fas fa-dumbbell"></i> My Workout Plans</h1>
+            <p>Track your personalized workout routines designed by professional trainers.</p>
+        </div>
+
+        <div th:if="${workoutPlans != null and !workoutPlans.empty}">
+            <div class="plans-grid">
+                <div th:each="plan : ${workoutPlans}" class="plan-card">
+                    <div class="plan-header">
+                        <h3 th:text="${plan.title}">Workout Plan Title</h3>
+                        <span class="plan-status active">Active</span>
+                    </div>
+                    <div class="plan-body">
+                        <p th:text="${plan.description}">Plan description</p>
+                        <div class="plan-meta">
+                            <span><i class="fas fa-user"></i> Trainer: <span th:text="${plan.trainer?.user?.username}">Trainer Name</span></span>
+                            <span><i class="fas fa-calendar"></i> Created: <span th:text="${#temporals.format(plan.createdAt, 'MMM dd, yyyy')}">Date</span></span>
+                        </div>
+                    </div>
+                    <div class="plan-actions">
+                        <a th:href="@{/workout-plans/{id}(id=${plan.id})}" class="btn btn-primary">
+                            <i class="fas fa-eye"></i> View Details
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div th:if="${workoutPlans == null or workoutPlans.empty}" class="empty-state">
+            <div class="empty-state-icon">🏋️</div>
+            <div class="empty-state-text">No Workout Plans Yet</div>
+            <p>You don't have any workout plans assigned yet. Book a session with a trainer to get started!</p>
+            <a th:href="@{/browse/trainers}" class="btn btn-primary">
+                <i class="fas fa-search"></i> Find a Trainer
+            </a>
+        </div>
+    </main>
+
+    <script th:src="@{/js/main.js}"></script>
+</body>
+</html>

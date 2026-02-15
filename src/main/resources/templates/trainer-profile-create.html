@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Trainer Profile - Fitness Hub</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+</head>
+<body>
+<div th:replace="~{fragments-navbar :: navbar('TRAINER')}"></div>
+
+<main class="dashboard">
+    <div class="dashboard-card">
+        <h2><i class="fas fa-dumbbell"></i> Create Your Trainer Profile</h2>
+        <p>Please fill in your professional information to complete your profile.</p>
+
+        <form th:action="@{/trainer/profile/create}" method="post" th:object="${profileRequest}" class="form-container">
+            <div class="form-group">
+                <label for="specialization"><i class="fas fa-star"></i> Specialization</label>
+                <input type="text" 
+                       id="specialization" 
+                       th:field="*{specialization}" 
+                       placeholder="e.g., Weight Training, Cardio, Yoga, CrossFit"
+                       required 
+                       class="form-control">
+                <small>Your area of fitness expertise</small>
+            </div>
+
+            <div class="form-group">
+                <label for="certifications"><i class="fas fa-certificate"></i> Bio & Certifications</label>
+                <textarea id="certifications" 
+                          th:field="*{certifications}" 
+                          placeholder="Tell us about yourself and your certifications. e.g., NASM-CPT certified trainer with 5 years experience..."
+                          rows="4"
+                          class="form-control"></textarea>
+                <small>Describe your background, certifications, and training philosophy</small>
+            </div>
+
+            <div class="form-group">
+                <label for="hourlyRate"><i class="fas fa-dollar-sign"></i> Hourly Rate ($)</label>
+                <input type="number" 
+                       id="hourlyRate" 
+                       th:field="*{hourlyRate}" 
+                       placeholder="e.g., 75.00"
+                       step="0.01"
+                       min="0"
+                       required 
+                       class="form-control">
+                <small>Your hourly training rate</small>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-check"></i> Create Profile
+                </button>
+                <a th:href="@{/trainer/dashboard}" class="btn btn-secondary">
+                    <i class="fas fa-times"></i> Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <div class="dashboard-card" style="background: rgba(79, 209, 197, 0.1); border: 1px solid rgba(79, 209, 197, 0.3);">
+        <h3><i class="fas fa-info-circle"></i> Why Create a Profile?</h3>
+        <ul style="line-height: 1.8; color: #e2e8f0;">
+            <li>Members can find and book training sessions with you</li>
+            <li>Create personalized workout plans for your clients</li>
+            <li>Manage your schedule and availability</li>
+            <li>Receive ratings and feedback from members</li>
+            <li>Track your earnings and session history</li>
+        </ul>
+    </div>
+</main>
+
+<style>
+    .form-container {
+        max-width: 600px;
+        margin: 2rem auto;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: #4fd1c5;
+        font-weight: 600;
+    }
+
+    .form-group label i {
+        margin-right: 0.5rem;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #333;
+        border-radius: 8px;
+        background: #0f0f0f;
+        color: #e0e0e0;
+        font-size: 1rem;
+        transition: border-color 0.3s, box-shadow 0.3s;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: #4fd1c5;
+        box-shadow: 0 0 0 3px rgba(79, 209, 197, 0.2);
+    }
+
+    .form-group small {
+        display: block;
+        margin-top: 0.25rem;
+        color: #94a3b8;
+        font-size: 0.875rem;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+
+    .form-actions .btn {
+        flex: 1;
+    }
+</style>
+</body>
+</html>

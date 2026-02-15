@@ -1,0 +1,1053 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Member Dashboard - Fitness Hub</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        /* Member Dashboard Specific Overrides */
+        .registration-reminder {
+            background: linear-gradient(135deg, rgba(255,170,0,0.12), rgba(255,136,0,0.06));
+            border: 1px solid rgba(255,170,0,0.3);
+        }
+
+        .registration-reminder h3 {
+            color: #ffaa00;
+            margin-bottom: 0.6rem;
+        }
+
+        .registration-reminder .btn-primary {
+            background: linear-gradient(135deg, #ffaa00, #ff8800);
+        }
+
+        .registration-reminder .btn-primary:hover {
+            background: linear-gradient(135deg, #ff8800, #e06c00);
+        }
+
+        /* Chatbot specific styles */
+        .chatbot-modal {
+            position: fixed;
+            bottom: 100px;
+            right: 30px;
+            width: 390px;
+            max-height: 600px;
+            background: #1a1a1a;
+            border-radius: 16px;
+            box-shadow: 0 14px 44px rgba(0,0,0,0.65);
+            border: 1px solid #00ff8833;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transform: scale(0.82) translateY(50px);
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            z-index: 999;
+        }
+
+        .chatbot-modal.open {
+            transform: scale(1) translateY(0);
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .chatbot-header {
+            background: #111;
+            padding: 1.1rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #00ff8833;
+        }
+
+        .chatbot-header h3 {
+            display: flex;
+            align-items: center;
+            gap: 0.7rem;
+            font-size: 1.28rem;
+            color: #00ff88;
+        }
+
+        .chatbot-close {
+            background: none;
+            border: none;
+            color: #999;
+            font-size: 1.7rem;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .chatbot-close:hover {
+            color: #00ff88;
+        }
+
+        .chatbot-content,
+        #registration-chat-area {
+            flex: 1;
+            padding: 1.3rem;
+            overflow-y: auto;
+            font-size: 0.98rem;
+            background: #151515;
+        }
+
+        .chatbot-input-area {
+            display: flex;
+            padding: 1rem 1.3rem;
+            background: #161616;
+            border-top: 1px solid #252525;
+        }
+
+        .chatbot-input,
+        #registration-input {
+            flex: 1;
+            padding: 0.85rem 1.3rem;
+            border: 1px solid #3a3a3a;
+            border-radius: 999px;
+            background: #1f1f1f;
+            color: white;
+            font-size: 1rem;
+        }
+
+        .chatbot-input:focus,
+        #registration-input:focus {
+            outline: none;
+            border-color: #00ff88;
+            box-shadow: 0 0 0 3px rgba(0, 255, 136, 0.2);
+        }
+
+        .chatbot-send-btn {
+            margin-left: 0.9rem;
+            background: linear-gradient(135deg, #00ff88, #00cc66);
+            color: #000;
+            border: none;
+            border-radius: 50%;
+            width: 46px;
+            height: 46px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 700;
+        }
+
+        .chatbot-send-btn:hover {
+            background: linear-gradient(135deg, #00cc66, #00aa55);
+            transform: scale(1.05);
+        }
+
+        /* Messages */
+        .message,
+        .chatbot-message {
+            margin: 0.9rem 0;
+            padding: 1rem 1.4rem;
+            border-radius: 20px;
+            max-width: 84%;
+            line-height: 1.48;
+            word-wrap: break-word;
+        }
+
+        .bot-message,
+        .chatbot-bot-message {
+            background: #252525;
+            color: #e0e0e0;
+            align-self: flex-start;
+            border-bottom-left-radius: 6px;
+            border: 1px solid #333;
+        }
+
+        .user-message,
+        .chatbot-user-message {
+            background: linear-gradient(135deg, rgba(0,255,136,0.2), rgba(0,204,102,0.15));
+            color: #00ff88;
+            border: 1px solid #00ff8844;
+            align-self: flex-end;
+            margin-left: auto;
+            border-bottom-right-radius: 6px;
+        }
+
+        .message.error {
+            background: rgba(220,53,69,0.18) !important;
+            color: #ff7777 !important;
+            border: 1px solid rgba(220,53,69,0.3);
+        }
+
+        .message.success {
+            background: rgba(0,255,136,0.18) !important;
+            color: #00ff88 !important;
+            border: 1px solid #00ff8844;
+        }
+
+        .chatbot-plan-card {
+            background: #1e1e1e;
+            border: 1px solid #00ff8833;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            color: #e0e0e0;
+        }
+
+        .chatbot-plan-card strong {
+            color: #00ff88;
+        }
+
+        .progress-bar {
+            height: 6px;
+            background: #2a2a2a;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00ff88, #00cc66);
+            transition: width 0.45s ease;
+        }
+
+        /* Floating buttons */
+        .chatbot-fab {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #00ff88, #00cc66);
+            color: #000;
+            font-size: 1.9rem;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 8px 25px rgba(0,255,136,0.4);
+            transition: all 0.28s ease;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .chatbot-fab:hover {
+            transform: scale(1.1) translateY(-3px);
+            box-shadow: 0 12px 30px rgba(0,255,136,0.5);
+        }
+
+        .registration-chatbot-fab {
+            position: fixed;
+            bottom: 110px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #ffaa00, #ff8800);
+            color: #000;
+            border: none;
+            border-radius: 50%;
+            font-size: 1.5rem;
+            cursor: pointer;
+            box-shadow: 0 8px 25px rgba(255, 170, 0, 0.4);
+            transition: all 0.3s ease;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .registration-chatbot-fab:hover {
+            transform: scale(1.1) translateY(-3px);
+            box-shadow: 0 12px 30px rgba(255, 170, 0, 0.5);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .chatbot-modal {
+                width: 94vw;
+                right: 3vw;
+                bottom: 100px;
+            }
+
+            .chatbot-fab {
+                bottom: 20px;
+                right: 20px;
+                width: 60px;
+                height: 60px;
+            }
+
+            .registration-chatbot-fab {
+                bottom: 90px;
+                right: 20px;
+                width: 50px;
+                height: 50px;
+            }
+        }
+        
+        .activity-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .activity-item {
+            display: flex;
+            gap: 1rem;
+            padding: 1rem;
+            background: rgba(30, 41, 59, 0.5);
+            border-radius: 8px;
+            border-left: 3px solid #00ff88;
+        }
+        
+        .activity-icon {
+            font-size: 1.5rem;
+        }
+        
+        .activity-content {
+            flex: 1;
+        }
+        
+        .activity-title {
+            font-weight: 600;
+            color: #e2e8f0;
+            margin-bottom: 0.25rem;
+        }
+        
+        .activity-details {
+            color: #94a3b8;
+            font-size: 0.875rem;
+        }
+        
+        .status-confirmed {
+            color: #00ff88;
+            font-weight: 600;
+        }
+        
+        .status-completed {
+            color: #60a5fa;
+            font-weight: 600;
+        }
+        
+        .status-cancelled {
+            color: #ef4444;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+
+<div th:replace="~{fragments-navbar :: navbar('MEMBER')}"></div>
+
+<main class="dashboard">
+
+    <!-- Registration Reminder -->
+    <div class="dashboard-card registration-reminder" th:if="${!hasCompletedChatbot}">
+        <div style="display: flex; align-items: center; gap: 1.2rem;">
+            <div style="font-size: 2.8rem;">⚠️</div>
+            <div>
+                <h3>Complete Your Registration</h3>
+                <p style="margin-bottom: 1.2rem; color: #cccccc;">
+                    Please complete your member registration through our chatbot to access all features and get personalized recommendations.
+                </p>
+                <button onclick="openRegistrationChatbot()" class="btn btn-primary">
+                    <i class="fas fa-user-plus"></i> Complete Registration
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Welcome -->
+    <div class="dashboard-card">
+        <h1 style="color: #00ff88;"><i class="fas fa-user-circle"></i> Welcome, <span sec:authentication="principal.username">Member</span>!</h1>
+        <p style="color: #aaaaaa;">Manage your fitness journey from your personalized dashboard.</p>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon" style="color: #00ff88;"><i class="fas fa-calendar-check"></i></div>
+            <div class="stat-content">
+                <div class="stat-label">Upcoming Sessions</div>
+                <div class="stat-value" style="color: #00ff88;" th:text="${upcomingSessions}">0</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon" style="color: #00ff88;"><i class="fas fa-utensils"></i></div>
+            <div class="stat-content">
+                <div class="stat-label">Active Meal Plans</div>
+                <div class="stat-value" style="color: #00ff88;" th:text="${activeMealPlans}">0</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon" style="color: #00ff88;"><i class="fas fa-dumbbell"></i></div>
+            <div class="stat-content">
+                <div class="stat-label">Workout Plans</div>
+                <div class="stat-value" style="color: #00ff88;" th:text="${workoutPlans}">0</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon" style="color: #00ff88;"><i class="fas fa-chart-line"></i></div>
+            <div class="stat-content">
+                <div class="stat-label">Total Sessions</div>
+                <div class="stat-value" style="color: #00ff88;" th:text="${totalSessions}">0</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="dashboard-grid">
+        <div class="dashboard-card">
+            <div class="card-header"><h3 style="color: #00ff88;"><i class="fas fa-calendar-alt"></i> My Bookings</h3></div>
+            <div class="card-body">
+                <p>View and manage your upcoming training sessions with trainers and doctors.</p>
+                <a th:href="@{/member/bookings}" class="btn btn-primary"><i class="fas fa-eye"></i> View Bookings</a>
+            </div>
+        </div>
+
+        <div class="dashboard-card">
+            <div class="card-header"><h3 style="color: #00ff88;"><i class="fas fa-search"></i> Find a Trainer</h3></div>
+            <div class="card-body">
+                <p>Browse available trainers and book personalized training sessions.</p>
+                <a th:href="@{/browse/trainers}" class="btn btn-primary"><i class="fas fa-users"></i> Browse Trainers</a>
+            </div>
+        </div>
+
+        <div class="dashboard-card">
+            <div class="card-header"><h3 style="color: #00ff88;"><i class="fas fa-user-md"></i> Find a Doctor</h3></div>
+            <div class="card-body">
+                <p>Browse available doctors and book medical consultations.</p>
+                <a th:href="@{/browse/doctors}" class="btn btn-primary"><i class="fas fa-stethoscope"></i> Browse Doctors</a>
+            </div>
+        </div>
+
+        <div class="dashboard-card">
+            <div class="card-header"><h3 style="color: #00ff88;"><i class="fas fa-utensils"></i> Meal Plans</h3></div>
+            <div class="card-body">
+                <p>Access your personalized nutrition plans created by our doctors.</p>
+                <a th:href="@{/meal-plans/member}" class="btn btn-primary"><i class="fas fa-eye"></i> View Meal Plans</a>
+            </div>
+        </div>
+
+        <div class="dashboard-card">
+            <div class="card-header"><h3 style="color: #00ff88;"><i class="fas fa-dumbbell"></i> Workout Plans</h3></div>
+            <div class="card-body">
+                <p>Follow your custom workout routines designed by professional trainers.</p>
+                <a th:href="@{/member/workout-plans}" class="btn btn-primary"><i class="fas fa-eye"></i> View Workout Plans</a>
+            </div>
+        </div>
+
+        <div class="dashboard-card">
+            <div class="card-header"><h3 style="color: #00ff88;"><i class="fas fa-credit-card"></i> Payment History</h3></div>
+            <div class="card-body">
+                <p>View your payment history and transaction records.</p>
+                <a th:href="@{/payments/member}" class="btn btn-primary"><i class="fas fa-eye"></i> View Payments</a>
+            </div>
+        </div>
+
+        <div class="dashboard-card">
+            <div class="card-header"><h3 style="color: #00ff88;"><i class="fas fa-file-invoice"></i> Invoices</h3></div>
+            <div class="card-body">
+                <p>Access and download your payment invoices and receipts.</p>
+                <a th:href="@{/payments/invoices}" class="btn btn-primary"><i class="fas fa-file-invoice-dollar"></i> View Invoices</a>
+            </div>
+        </div>
+
+        <div class="dashboard-card">
+            <div class="card-header"><h3 style="color: #00ff88;"><i class="fas fa-star"></i> My Ratings</h3></div>
+            <div class="card-body">
+                <p>Rate your trainers and doctors to help improve our services.</p>
+                <a th:href="@{/member/ratings}" class="btn btn-primary"><i class="fas fa-star"></i> View Ratings</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="dashboard-card">
+        <h2 style="color: #00ff88;"><i class="fas fa-clock"></i> Recent Activity</h2>
+        <div th:if="${recentBookings.empty}" class="empty-state">
+            <div class="empty-state-icon">📊</div>
+            <div class="empty-state-text" style="color: #888;">No recent activity</div>
+            <p style="color: #666;">Your recent bookings and activities will appear here.</p>
+        </div>
+        <div th:unless="${recentBookings.empty}" class="activity-list">
+            <div th:each="booking : ${recentBookings}" class="activity-item">
+                <div class="activity-icon">
+                    <i class="fas fa-calendar-check" style="color: #00ff88;"></i>
+                </div>
+                <div class="activity-content">
+                    <div class="activity-title" th:text="${booking.type == T(com.example.gym.model.Booking$BookingType).TRAINING ? 'Training Session' : 'Doctor Consultation'}">Session Type</div>
+                    <div class="activity-details">
+                        <span th:text="${#temporals.format(booking.dateTime, 'MMM dd, yyyy HH:mm')}">Date and Time</span>
+                        <span> - </span>
+                        <span th:text="${booking.status}" th:classappend="${booking.status == T(com.example.gym.model.Booking$BookingStatus).CONFIRMED} ? 'status-confirmed' : (${booking.status == T(com.example.gym.model.Booking$BookingStatus).COMPLETED} ? 'status-completed' : 'status-cancelled')">Status</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tip -->
+    <div class="dashboard-card" style="background: linear-gradient(135deg, rgba(0,255,136,0.08), rgba(0,204,102,0.04)); border: 1px solid rgba(0,255,136,0.2);">
+        <h3 style="color: #00ff88;"><i class="fas fa-lightbulb"></i> Fitness Tip of the Day</h3>
+        <p style="color: #cccccc;">
+            "Consistency is key! Even 20 minutes of exercise daily can make a significant difference in your fitness journey.
+            Start small, stay consistent, and watch yourself grow stronger every day."
+        </p>
+    </div>
+</main>
+
+<!-- Floating buttons -->
+<button class="chatbot-fab" id="chatbot-fab-btn" title="Open Fitness Advisor">
+    <i class="fas fa-heartbeat"></i>
+</button>
+
+<button class="registration-chatbot-fab" id="registration-chatbot-fab"
+        title="Complete Member Registration"
+        th:if="${!hasCompletedChatbot}">
+    <i class="fas fa-user-plus"></i>
+</button>
+
+<!-- Fitness Advisor Modal -->
+<div class="chatbot-modal" id="chatbot-modal">
+    <div class="chatbot-header">
+        <h3><i class="fas fa-heartbeat"></i> <span class="title-text">Fitness Advisor</span></h3>
+        <button class="chatbot-close" id="chatbot-close-btn">✕</button>
+    </div>
+    <div id="chatbot-content" class="chatbot-content"></div>
+    <div class="chatbot-input-area">
+        <input id="chatbot-input" type="text" class="chatbot-input" placeholder="Type your answer here..." autocomplete="off"/>
+        <button id="chatbot-send-btn" class="chatbot-send-btn">Send</button>
+    </div>
+</div>
+
+<!-- Registration Modal -->
+<div class="chatbot-modal" id="registration-chatbot-modal" th:if="${!hasCompletedChatbot}">
+    <div class="chatbot-header" style="background: linear-gradient(135deg, #ffaa00, #ff8800);">
+        <h3><i class="fas fa-user-plus"></i> Member Registration</h3>
+        <button class="chatbot-close" id="registration-chatbot-close"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="progress-bar">
+        <div class="progress-fill" id="registration-progress" style="width: 0%; background: linear-gradient(90deg, #ffaa00, #ff8800);"></div>
+    </div>
+    <div id="registration-chat-area"></div>
+    <div class="chatbot-input-area">
+        <input type="text" id="registration-input" placeholder="Type your answer..." autocomplete="off">
+    </div>
+</div>
+
+<!-- Scripts -->
+<script th:src="@{/js/main.js}"></script>
+<script th:inline="javascript">
+    // Get user email from Thymeleaf model
+    const userEmail = /*[[${userEmail}]]*/ '';
+
+    // Chatbot Modal Controls
+    const chatbotFab = document.getElementById('chatbot-fab-btn');
+    const chatbotModal = document.getElementById('chatbot-modal');
+    const chatbotClose = document.getElementById('chatbot-close-btn');
+    const registrationChatbotFab = document.getElementById('registration-chatbot-fab');
+    const registrationChatbotModal = document.getElementById('registration-chatbot-modal');
+    const registrationChatbotClose = document.getElementById('registration-chatbot-close');
+
+    // Fitness Advisor Chatbot
+    chatbotFab.addEventListener('click', () => {
+        if (!chatbotModal.classList.contains('open')) {
+            chatbotModal.classList.add('open');
+            initializeChatbot();
+        }
+    });
+
+    chatbotClose.addEventListener('click', () => {
+        chatbotModal.classList.remove('open');
+    });
+
+    // Registration Chatbot Button (only if it exists)
+    if (registrationChatbotFab) {
+        registrationChatbotFab.addEventListener('click', () => {
+            registrationChatbotModal.classList.add('open');
+            if (registrationChat.innerHTML === '') {
+                startRegistrationChatbot();
+            }
+        });
+    }
+
+    if (registrationChatbotClose) {
+        registrationChatbotClose.addEventListener('click', () => {
+            registrationChatbotModal.classList.remove('open');
+        });
+    }
+
+    // Close when clicking outside
+    document.addEventListener('click', (e) => {
+        if (!chatbotModal.contains(e.target) && !chatbotFab.contains(e.target)) {
+            chatbotModal.classList.remove('open');
+        }
+        if (registrationChatbotModal && !registrationChatbotModal.contains(e.target) &&
+            registrationChatbotFab && !registrationChatbotFab.contains(e.target)) {
+            registrationChatbotModal.classList.remove('open');
+        }
+    });
+
+    // ========== REGISTRATION CHATBOT LOGIC ==========
+    const registrationChat = document.getElementById('registration-chat-area');
+    const registrationInput = document.getElementById('registration-input');
+    const registrationProgress = document.getElementById('registration-progress');
+
+    const questions = [
+        { q: "Welcome! What's your full name?", key: "name", validate: v => v.trim().length >= 2 || "Please enter a valid name (min 2 characters)" },
+        { q: "How old are you?", key: "age", validate: v => { const n = parseInt(v); return !isNaN(n) && n >= 16 && n <= 100 ? true : "Age must be between 16 and 100"; }},
+        { q: "What's your contact number? (e.g. +94712345678)", key: "contact_number", validate: v => /^\+?\d{9,15}$/.test(v) || "Enter a valid phone number (9-15 digits)" },
+        { q: "What's your email address?", key: "email", validate: v => /^[\w\.-]+@[\w\.-]+\.\w+$/.test(v) || "Please enter a valid email", default: userEmail },
+        { q: "What's your gender? (Male / Female / Other)", key: "gender", validate: v => ['male','female','other'].includes(v.trim().toLowerCase()) || "Please choose Male, Female or Other" },
+        { q: "How would you like to pay? (cash / online)", key: "payment_method", validate: v => ['cash','online'].includes(v.trim().toLowerCase()) || "Please choose cash or online" },
+        { q: "Please enter your transaction ID (for online) or type 'cash' if paying at gym", key: "transaction_id", validate: (v, data) => {
+                if (data.payment_method?.toLowerCase() === 'online' && !v.trim()) return "Transaction ID is required for online payment";
+                return true;
+            }, optional: true }
+    ];
+
+    let currentQuestion = 0;
+    const responses = {};
+    let activityInterval;
+
+    function updateRegistrationProgress() {
+        const progress = ((currentQuestion) / questions.length) * 100;
+        registrationProgress.style.width = progress + '%';
+    }
+
+    function addRegistrationMessage(text, type = 'bot') {
+        const div = document.createElement('div');
+        div.className = `message ${type === 'user' ? 'user-message' : 'bot-message'}`;
+        div.innerHTML = text;
+        registrationChat.appendChild(div);
+        registrationChat.scrollTop = registrationChat.scrollHeight;
+    }
+
+    function askRegistrationQuestion() {
+        if (currentQuestion >= questions.length) {
+            submitRegistration();
+            return;
+        }
+        updateRegistrationProgress();
+        const q = questions[currentQuestion];
+
+        // Pre-fill email if available
+        if (q.key === 'email' && q.default) {
+            addRegistrationMessage(q.q);
+            addRegistrationMessage(`Using your account email: ${q.default}`, 'bot');
+            responses[q.key] = q.default;
+            currentQuestion++;
+            setTimeout(askRegistrationQuestion, 600);
+            return;
+        }
+
+        addRegistrationMessage(q.q);
+    }
+
+    function handleRegistrationResponse(answer) {
+        const q = questions[currentQuestion];
+        const validation = q.validate(answer, responses);
+
+        if (validation !== true) {
+            addRegistrationMessage(validation, 'error');
+            return false;
+        }
+
+        responses[q.key] = answer.trim();
+        addRegistrationMessage(answer, 'user');
+        currentQuestion++;
+        setTimeout(askRegistrationQuestion, 600);
+        return true;
+    }
+
+    async function submitRegistration() {
+        addRegistrationMessage("Processing your registration...");
+        addRegistrationMessage("⏳", 'bot');
+
+        responses.gender = responses.gender?.charAt(0).toUpperCase() + responses.gender?.slice(1).toLowerCase();
+        responses.payment_method = responses.payment_method?.toLowerCase();
+
+        const payload = { ...responses };
+
+        try {
+            const res = await fetch('http://127.0.0.1:5001/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            const result = await res.json();
+
+            if (res.ok && result.success) {
+                stopActivityTracking();
+                updateRegistrationProgress();
+                registrationProgress.style.width = '100%';
+                addRegistrationMessage("✅ Registration successful! Welcome to Fitness Hub!", 'success');
+                addRegistrationMessage("Refreshing your dashboard...", 'bot');
+
+                // Reload page after 2 seconds to update dashboard
+                setTimeout(() => {
+                    window.location.reload();
+                }, 2000);
+            } else {
+                addRegistrationMessage("❌ Registration failed: " + (result.error || "Unknown error"), 'error');
+                if (result.details) {
+                    result.details.forEach(detail => addRegistrationMessage("• " + detail, 'error'));
+                }
+                addRegistrationMessage("Please close and try again.", 'bot');
+            }
+        } catch (err) {
+            console.error('Registration error:', err);
+            addRegistrationMessage("❌ Network error: Cannot connect to registration server.", 'error');
+            addRegistrationMessage("Please make sure the Flask API is running on port 5001.", 'error');
+        }
+    }
+
+    function startActivityTracking() {
+        activityInterval = setInterval(async () => {
+            if (userEmail) {
+                try {
+                    await fetch('http://127.0.0.1:5001/chatbot-activity', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email: userEmail })
+                    });
+                } catch (err) {
+                    console.log('Activity update failed:', err);
+                }
+            }
+        }, 30000);
+    }
+
+    function stopActivityTracking() {
+        if (activityInterval) {
+            clearInterval(activityInterval);
+        }
+    }
+
+    function startRegistrationChatbot() {
+        currentQuestion = 0;
+        Object.keys(responses).forEach(key => delete responses[key]);
+        registrationChat.innerHTML = '';
+        registrationProgress.style.width = '0%';
+        startActivityTracking();
+        askRegistrationQuestion();
+    }
+
+    if (registrationInput) {
+        registrationInput.addEventListener('keypress', e => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                const answer = registrationInput.value.trim();
+                if (!answer) return;
+
+                if (handleRegistrationResponse(answer)) {
+                    registrationInput.value = '';
+                }
+            }
+        });
+    }
+
+    // Handle page unload to clean up session
+    window.addEventListener('beforeunload', () => {
+        stopActivityTracking();
+    });
+
+    // Function to open registration chatbot (called from notification card)
+    function openRegistrationChatbot() {
+        if (registrationChatbotModal) {
+            registrationChatbotModal.classList.add('open');
+            if (registrationChat.innerHTML === '') {
+                startRegistrationChatbot();
+            }
+        }
+    }
+
+    // ========== FITNESS ADVISOR CHATBOT LOGIC ==========
+    const chat = document.getElementById('chatbot-content');
+    const input = document.getElementById('chatbot-input');
+    const sendBtn = document.getElementById('chatbot-send-btn');
+    let chatbotInitialized = false;
+    let state = 'menu';
+    let userData = { gender: null, goal: null, height_cm: null, weight_kg: null, age: null };
+
+    function initializeChatbot() {
+        if (!chatbotInitialized) {
+            chat.innerHTML = '';
+            addMessage("Welcome to your personal fitness advisor! 💪");
+            addMessage(
+                "I can help you get a <strong>personalized workout + meal plan</strong>.<br><br>" +
+                "Just say: <strong>plan</strong> to start<br>" +
+                "or ask any fitness/nutrition question directly."
+            );
+            input.focus();
+            chatbotInitialized = true;
+        }
+    }
+
+    function resetConversation() {
+        state = 'menu';
+        userData = { gender: null, goal: null, height_cm: null, weight_kg: null, age: null };
+        chat.innerHTML = '';
+        addMessage("Welcome to your personal fitness advisor.");
+        addMessage("What would you like to do?<br><small>(plan / question)</small>");
+        input.focus();
+    }
+
+    function startPlanFlow() {
+        state = 'gender';
+        addMessage("Starting a new plan calculation.");
+        addMessage("Are you <strong>Male</strong> or <strong>Female</strong>?");
+        input.focus();
+    }
+
+    function addMessage(text, isUser = false) {
+        const msg = document.createElement('div');
+        msg.className = `chatbot-message ${isUser ? 'chatbot-user-message' : 'chatbot-bot-message'}`;
+        msg.innerHTML = text;
+        chat.appendChild(msg);
+        chat.scrollTop = chat.scrollHeight;
+    }
+
+    function showPlan(plan) {
+        const card = document.createElement('div');
+        card.className = 'chatbot-plan-card';
+        card.innerHTML = `
+            <strong style="font-size:1.1rem; color:#5d4a38;">Your Personalized Plan</strong><br><br>
+            <strong>BMI Category:</strong> ${plan.bmi_category}<br><br>
+            <strong>Exercise Schedule:</strong><br>${plan.exercise_schedule}<br><br>
+            <strong>Meal Plan:</strong><br>${plan.meal_plan}<br><br>
+            ${plan.note ? `<em style="color:#7a6a52;">${plan.note}</em><br><br>` : ''}
+            <small style="color:#6b5a48; opacity:0.8;">${plan.disclaimer || 'This is general guidance only. Please consult a qualified professional.'}</small>
+            <br><br>
+            <strong>Would you like to check another plan?</strong><br>
+            <small>(yes / new / another / no / finish)</small>
+        `;
+        chat.appendChild(card);
+        chat.scrollTop = chat.scrollHeight;
+    }
+
+    async function fetchPlan() {
+        addMessage("Preparing your custom plan...");
+        try {
+            const res = await fetch('http://localhost:5000/api/recommend-plan', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(userData)
+            });
+            const data = await res.json();
+
+            if (data.success) {
+                showPlan(data);
+                state = 'ask_another';
+            } else {
+                addMessage(`<span style="color:#8b0000;">${data.message || "No plan found for this combination."}</span>`);
+                state = 'ask_another';
+            }
+        } catch (err) {
+            addMessage('<span style="color:#8b0000;">Cannot connect to server. Is the API running?</span>');
+            state = 'ask_another';
+        }
+    }
+
+    async function fetchAnswer(question) {
+        addMessage("Searching for an answer...");
+        try {
+            const res = await fetch('http://localhost:5000/api/ask-question', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ question: question })
+            });
+            const data = await res.json();
+
+            if (data.success) {
+                addMessage(data.answer);
+                state = 'ask_another';
+                addMessage("<br><strong>Would you like to:</strong><br>• Ask another question? (ask / question)<br>• Get a personalized plan? (plan)<br>• Finish? (done / finish)");
+            } else {
+                addMessage(`<span style="color:#8b0000;">${data.message || "Could not process your question."}</span>`);
+                state = 'ask_another';
+            }
+        } catch (err) {
+            addMessage('<span style="color:#8b0000;">Cannot connect to server. Is the API running?</span>');
+            state = 'ask_another';
+        }
+    }
+
+    function processInput(text) {
+        const msg = text.trim().toLowerCase();
+
+        if (state === 'menu') {
+            if (msg.includes('plan')) {
+                addMessage("Plan", true);
+                startPlanFlow();
+            } else if (msg.includes('question') || msg.includes('ask')) {
+                addMessage("Question", true);
+                addMessage("Great! Ask me anything about fitness, nutrition, workouts, or health. What's your question?");
+                state = 'question';
+            } else {
+                addMessage("Please choose: <strong>plan</strong> (for a personalized plan) or <strong>question</strong> (to ask about fitness/nutrition).");
+            }
+            return;
+        }
+
+        if (state === 'question') {
+            addMessage(text, true);
+            fetchAnswer(text);
+            return;
+        }
+
+        if (state === 'ask_another') {
+            if (msg.includes('plan')) {
+                addMessage("Plan", true);
+                resetConversation();
+                setTimeout(() => startPlanFlow(), 100);
+            } else if (msg.includes('question') || msg.includes('ask')) {
+                addMessage("Question", true);
+                addMessage("Ask me anything about fitness, nutrition, workouts, or health. What's your question?");
+                state = 'question';
+            } else if (msg.includes('yes') || msg.includes('another') || msg.includes('y')) {
+                addMessage("Yes, let's do another one!", true);
+                resetConversation();
+            } else if (msg.includes('no') || msg.includes('finish') || msg.includes('done') || msg.includes('end') || msg.includes('thank')) {
+                addMessage("Thank you for using Fitness Advisor!", true);
+                addMessage("Goodbye! Come back anytime you need help with your fitness journey. 💪");
+                state = 'finished';
+                input.placeholder = "Chat ended. Click the icon to start again.";
+            } else {
+                addMessage("Please tell me what you'd like to do: <strong>plan</strong>, <strong>question</strong>, or <strong>done</strong>.");
+            }
+            return;
+        }
+
+        if (state === 'gender') {
+            if (msg.includes('female') || msg.includes('f')) {
+                userData.gender = 'Female';
+            } else if (msg.includes('male') || msg.includes('m')) {
+                userData.gender = 'Male';
+            }
+            if (userData.gender) {
+                addMessage(userData.gender, true);
+                addMessage("Excellent. What is your primary goal?<br><small>Examples: muscle gain, fat loss, strength, toning, recomp, glute building, endurance, core strength, mobility, posture, general fitness</small>");
+                state = 'goal';
+            } else {
+                addMessage("Please answer with <strong>Male</strong> or <strong>Female</strong>.");
+            }
+        }
+        else if (state === 'goal') {
+            const goalInput = msg.toLowerCase().trim();
+
+            // Expanded goal detection
+            if (goalInput.includes('muscle') || goalInput.includes('gain muscle') || goalInput.includes('build muscle') ||
+                goalInput.includes('size') || goalInput.includes('hypertrophy') || goalInput.includes('bulk')) {
+                userData.goal = 'muscle_gain';
+            }
+            else if (goalInput.includes('fat') || goalInput.includes('burn') || goalInput.includes('loss') ||
+                goalInput.includes('lose fat') || goalInput.includes('cut') || goalInput.includes('shred') ||
+                goalInput.includes('lean') || goalInput.includes('definition')) {
+                userData.goal = 'fat_burn';
+            }
+            else if (goalInput.includes('strength') || goalInput.includes('stronger') || goalInput.includes('power') ||
+                goalInput.includes('max') || goalInput.includes('1rm') || goalInput.includes('lift heavier')) {
+                userData.goal = 'strength_gain';
+            }
+            else if (goalInput.includes('recomp') || goalInput.includes('recomposition') ||
+                goalInput.includes('lose fat gain muscle') || goalInput.includes('simultaneous')) {
+                userData.goal = 'recomposition';
+            }
+            else if (goalInput.includes('tone') || goalInput.includes('toning') || goalInput.includes('shape') ||
+                goalInput.includes('define') || goalInput.includes('firm')) {
+                userData.goal = 'toning';
+            }
+            else if (goalInput.includes('glute') || goalInput.includes('booty') || goalInput.includes('butt') ||
+                goalInput.includes('hip')) {
+                userData.goal = 'glute_focus';
+            }
+            else if (goalInput.includes('endurance') || goalInput.includes('stamina') || goalInput.includes('cardio') ||
+                goalInput.includes('longer') || goalInput.includes('run longer')) {
+                userData.goal = 'endurance_build';
+            }
+            else if (goalInput.includes('core') || goalInput.includes('abs') || goalInput.includes('six pack') ||
+                goalInput.includes('midsection')) {
+                userData.goal = 'core_strength';
+            }
+            else if (goalInput.includes('mobility') || goalInput.includes('flexib') || goalInput.includes('stretch') ||
+                goalInput.includes('range of motion')) {
+                userData.goal = 'mobility_improve';
+            }
+            else if (goalInput.includes('posture') || goalInput.includes('fix posture') || goalInput.includes('straighten')) {
+                userData.goal = 'posture_correction';
+            }
+            else if (goalInput.includes('general') || goalInput.includes('overall') || goalInput.includes('health') ||
+                goalInput.includes('fit') || goalInput.includes('maintain')) {
+                userData.goal = 'general_fitness';
+            }
+
+            if (userData.goal) {
+                addMessage(text, true);
+                addMessage(`Great choice — <strong>${userData.goal.replace('_', ' ')}</strong> selected.`);
+                addMessage("Next: What is your height in centimeters? (example: 170)");
+                state = 'height';
+            } else {
+                // Helpful guidance when goal is not recognized
+                addMessage("Sorry, I didn't catch that goal. Try one of these examples:", true);
+                addMessage(
+                    "• muscle gain / build muscle / hypertrophy / bulk<br>" +
+                    "• fat burn / fat loss / cut / shred / get lean<br>" +
+                    "• strength / get stronger / power<br>" +
+                    "• recomp / recomposition<br>" +
+                    "• toning / get toned / definition<br>" +
+                    "• glute / booty building / hips<br>" +
+                    "• endurance / stamina / better cardio<br>" +
+                    "• core strength / abs / six pack<br>" +
+                    "• mobility / flexibility / stretching<br>" +
+                    "• posture / fix posture<br>" +
+                    "• general fitness / overall health / stay fit"
+                );
+            }
+        }
+        else if (state === 'height') {
+            const h = parseFloat(msg);
+            if (h > 100 && h < 250) {
+                userData.height_cm = h;
+                addMessage(h + " cm", true);
+                addMessage("Thank you. Now please tell me your weight in kilograms.");
+                state = 'weight';
+            } else {
+                addMessage("Please enter a realistic height (100–250 cm).");
+            }
+        }
+        else if (state === 'weight') {
+            const w = parseFloat(msg);
+            if (w > 30 && w < 300) {
+                userData.weight_kg = w;
+                addMessage(w + " kg", true);
+                addMessage("Almost there. How old are you?");
+                state = 'age';
+            } else {
+                addMessage("Please enter a realistic weight in kg.");
+            }
+        }
+        else if (state === 'age') {
+            const age = parseInt(msg);
+            if (age > 12 && age < 100) {
+                userData.age = age;
+                addMessage(age + " years", true);
+                fetchPlan();
+            } else {
+                addMessage("Please enter a valid age.");
+            }
+        }
+    }
+
+    function sendMessage() {
+        const text = input.value.trim();
+        if (!text) return;
+        addMessage(text, true);
+        processInput(text);
+        input.value = '';
+    }
+
+    sendBtn.addEventListener('click', sendMessage);
+    input.addEventListener('keypress', e => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            sendMessage();
+        }
+    });
+</script>
+</body>
+</html>

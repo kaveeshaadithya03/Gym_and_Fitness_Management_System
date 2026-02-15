@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Ratings - Fitness Hub</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+</head>
+<body>
+    <div th:replace="~{fragments-navbar :: navbar('MEMBER')}"></div>
+
+    <main class="dashboard">
+        <div class="dashboard-card">
+            <h1><i class="fas fa-star"></i> My Ratings & Reviews</h1>
+            <p>Rate your trainers and doctors to help improve our services.</p>
+        </div>
+
+        <div th:if="${ratings != null and !ratings.empty}">
+            <div class="ratings-grid">
+                <div th:each="rating : ${ratings}" class="rating-card">
+                    <div class="rating-header">
+                        <div class="rating-target">
+                            <i th:class="${rating.trainer != null ? 'fas fa-dumbbell' : 'fas fa-stethoscope'}"></i>
+                            <span th:if="${rating.trainer != null}" th:text="${rating.trainer.user.firstName + ' ' + rating.trainer.user.lastName}">Trainer Name</span>
+                            <span th:if="${rating.doctor != null}" th:text="${rating.doctor.user.firstName + ' ' + rating.doctor.user.lastName}">Doctor Name</span>
+                        </div>
+                        <div class="rating-stars">
+                            <span th:each="i : ${#numbers.sequence(1, rating.score)}" class="star filled">★</span>
+                            <span th:each="i : ${#numbers.sequence(rating.score + 1, 5)}" class="star">☆</span>
+                            <span class="rating-value" th:text="${rating.score} + '/5'">5/5</span>
+                        </div>
+                    </div>
+                    <div class="rating-body">
+                        <p th:text="${rating.comment}" th:if="${rating.comment}">Rating comment</p>
+                        <div class="rating-meta">
+                            <span><i class="fas fa-calendar"></i> <span th:text="${#temporals.format(rating.createdAt, 'MMM dd, yyyy')}">Date</span></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div th:if="${ratings == null or ratings.empty}" class="empty-state">
+            <div class="empty-state-icon">⭐</div>
+            <div class="empty-state-text">No Ratings Yet</div>
+            <p>You haven't rated any trainers or doctors yet. Complete a session to leave a rating!</p>
+            <a th:href="@{/member/bookings}" class="btn btn-primary">
+                <i class="fas fa-calendar"></i> View My Bookings
+            </a>
+        </div>
+
+        <!-- Quick Rating Form -->
+        <div class="dashboard-card">
+            <h3><i class="fas fa-plus"></i> Leave a New Rating</h3>
+            <form th:action="@{/ratings/create}" method="post" class="rating-form">
+                <div class="form-group">
+                    <label for="professionalType">Rate a:</label>
+                    <select id="professionalType" name="professionalType" class="form-control" required>
+                        <option value="">Select...</option>
+                        <option value="trainer">Trainer</option>
+                        <option value="doctor">Doctor</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="rating">Rating:</label>
+                    <div class="star-rating">
+                        <input type="radio" id="star5" name="rating" value="5" />
+                        <label for="star5" title="5 stars">★</label>
+                        <input type="radio" id="star4" name="rating" value="4" />
+                        <label for="star4" title="4 stars">★</label>
+                        <input type="radio" id="star3" name="rating" value="3" />
+                        <label for="star3" title="3 stars">★</label>
+                        <input type="radio" id="star2" name="rating" value="2" />
+                        <label for="star2" title="2 stars">★</label>
+                        <input type="radio" id="star1" name="rating" value="1" />
+                        <label for="star1" title="1 star">★</label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="comment">Comment (optional):</label>
+                    <textarea id="comment" name="comment" class="form-control" rows="3" 
+                              placeholder="Share your experience..."></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-star"></i> Submit Rating
+                </button>
+            </form>
+        </div>
+    </main>
+
+    <script th:src="@{/js/main.js}"></script>
+</body>
+</html>

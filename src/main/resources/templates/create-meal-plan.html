@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Meal Plan - Fitness Hub</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+</head>
+<body>
+<div th:replace="~{fragments-navbar :: navbar('DOCTOR')}"></div>
+
+<main class="dashboard">
+    <section class="dashboard-card">
+        <h2><i class="fas fa-utensils"></i> Create New Meal Plan</h2>
+
+        <form th:action="@{/meal-plans/create}" th:object="${mealPlanRequest}" method="post">
+            <!-- Auto-populate doctor ID from logged-in doctor -->
+            <input type="hidden" th:field="*{doctorId}" th:value="${doctorId}">
+            
+            <div class="form-group">
+                <label for="memberId"><i class="fas fa-user"></i> Select Member</label>
+                <select id="memberId" th:field="*{memberId}" required>
+                    <option value="">Choose a member...</option>
+                    <option th:each="member : ${members}" 
+                            th:value="${member.id}" 
+                            th:text="${member.user.username + ' (' + member.user.email + ')'}">
+                    </option>
+                </select>
+                <small>Select the member to create a meal plan for</small>
+            </div>
+            <div class="form-group">
+                <label for="title"><i class="fas fa-heading"></i> Plan Title</label>
+                <input type="text" id="title" th:field="*{title}" required placeholder="e.g. Weight Loss Plan">
+            </div>
+            <div class="form-group">
+                <label for="description"><i class="fas fa-align-left"></i> Description</label>
+                <textarea id="description" th:field="*{description}" rows="4" placeholder="Detailed plan notes..."></textarea>
+            </div>
+            <div class="form-group">
+                <label for="caloriesPerDay"><i class="fas fa-fire"></i> Calories Per Day</label>
+                <input type="number" id="caloriesPerDay" th:field="*{caloriesPerDay}" required placeholder="2000">
+            </div>
+            <button type="submit" class="btn-primary"><i class="fas fa-save"></i> Create Plan</button>
+            <a th:href="@{/doctor/dashboard}" class="btn-secondary"><i class="fas fa-times"></i> Cancel</a>
+        </form>
+    </section>
+</main>
+</body>
+</html>

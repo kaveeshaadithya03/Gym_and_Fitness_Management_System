@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Workout Plan Details - Fitness Hub</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+</head>
+<body>
+<div th:replace="~{fragments-navbar :: navbar(${userRole})}"></div>
+
+<main class="dashboard">
+    <section class="dashboard-card">
+        <div class="plan-header-section">
+            <div>
+                <h2><i class="fas fa-dumbbell"></i> <span th:text="${plan.title}">Workout Plan Title</span></h2>
+                <p class="plan-meta">
+                    <span><i class="fas fa-calendar"></i> Created: <span th:text="${#temporals.format(plan.createdAt, 'MMM dd, yyyy')}">Date</span></span>
+                    <span th:if="${plan.difficultyLevel}"><i class="fas fa-chart-line"></i> Level: <span th:text="${plan.difficultyLevel}">Beginner</span></span>
+                    <span th:if="${plan.durationWeeks}"><i class="fas fa-calendar-week"></i> Duration: <span th:text="${plan.durationWeeks + ' weeks'}">4 weeks</span></span>
+                </p>
+            </div>
+            <div class="plan-actions">
+                <a href="javascript:history.back()" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Back
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <section class="dashboard-card">
+        <h3><i class="fas fa-info-circle"></i> Plan Information</h3>
+        <div class="info-grid">
+            <div class="info-item">
+                <label><i class="fas fa-user"></i> Member</label>
+                <p th:text="${plan.member.user.firstName + ' ' + plan.member.user.lastName}">Member Name</p>
+                <small th:text="${plan.member.user.email}">member@email.com</small>
+            </div>
+            <div class="info-item">
+                <label><i class="fas fa-user-tie"></i> Trainer</label>
+                <p th:text="${plan.trainer.user.firstName + ' ' + plan.trainer.user.lastName}">Trainer Name</p>
+                <small th:text="${plan.trainer.user.email}">trainer@email.com</small>
+            </div>
+        </div>
+        
+        <div class="info-item" th:if="${plan.description}">
+            <label><i class="fas fa-align-left"></i> Description</label>
+            <p th:text="${plan.description}">Plan description</p>
+        </div>
+    </section>
+
+    <section class="dashboard-card">
+        <h3><i class="fas fa-list"></i> Workout Schedule</h3>
+        
+        <div th:if="${plan.items.empty}" class="empty-state">
+            <div class="empty-state-icon">📋</div>
+            <div class="empty-state-text">No workout items yet</div>
+        </div>
+        
+        <div th:unless="${plan.items.empty}" class="workout-schedule">
+            <div th:each="entry : ${itemsByDay}" class="day-section">
+                <div th:if="${!entry.value.empty}">
+                    <h4 class="day-header" th:text="${entry.key}">Day</h4>
+                    <div class="exercises-list">
+                        <div th:each="item : ${entry.value}" class="exercise-card">
+                            <div class="exercise-name">
+                                <i class="fas fa-dumbbell"></i>
+                                <span th:text="${item.exerciseName}">Exercise Name</span>
+                            </div>
+                            <div class="exercise-details">
+                                <span class="badge"><i class="fas fa-layer-group"></i> <span th:text="${item.sets}">3</span> sets</span>
+                                <span class="badge"><i class="fas fa-redo"></i> <span th:text="${item.reps}">12</span> reps</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<style>
+.plan-header-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 2rem;
+}
+
+.plan-meta {
+    display: flex;
+    gap: 2rem;
+    margin-top: 0.5rem;
+    color: #94a3b8;
+    font-size: 0.9rem;
+}
+
+.plan-meta span {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.info-item {
+    margin-bottom: 1rem;
+}
+
+.info-item label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #4fd1c5;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.info-item p {
+    margin: 0.25rem 0;
+    color: #e2e8f0;
+}
+
+.info-item small {
+    color: #94a3b8;
+}
+
+.workout-schedule {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.day-section {
+    background: rgba(30, 41, 59, 0.5);
+    border-radius: 12px;
+    padding: 1.5rem;
+    border: 1px solid rgba(79, 209, 197, 0.2);
+}
+
+.day-header {
+    color: #4fd1c5;
+    margin: 0 0 1rem 0;
+    font-size: 1.1rem;
+    text-transform: capitalize;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.day-header::before {
+    content: '📅';
+    font-size: 1.2rem;
+}
+
+.exercises-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.exercise-card {
+    background: rgba(15, 23, 42, 0.6);
+    border-radius: 8px;
+    padding: 1rem;
+    border-left: 3px solid #4fd1c5;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.3s ease;
+}
+
+.exercise-card:hover {
+    background: rgba(15, 23, 42, 0.8);
+    transform: translateX(5px);
+}
+
+.exercise-name {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: #e2e8f0;
+    font-weight: 500;
+}
+
+.exercise-name i {
+    color: #4fd1c5;
+}
+
+.exercise-details {
+    display: flex;
+    gap: 1rem;
+}
+
+.badge {
+    background: rgba(79, 209, 197, 0.2);
+    color: #4fd1c5;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.875rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+@media (max-width: 768px) {
+    .plan-header-section {
+        flex-direction: column;
+    }
+    
+    .plan-meta {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .exercise-card {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+    }
+}
+</style>
+</body>
+</html>

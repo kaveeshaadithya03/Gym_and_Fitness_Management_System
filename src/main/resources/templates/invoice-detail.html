@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice Details - Fitness Hub</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+</head>
+<body>
+<div th:replace="~{fragments-navbar :: navbar('MEMBER')}"></div>
+
+<div class="container">
+    <div class="invoice-detail-container">
+        <div class="invoice-actions">
+            <a th:href="@{/payments/invoices}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Invoices
+            </a>
+            <button onclick="window.print()" class="btn">
+                <i class="fas fa-print"></i> Print Invoice
+            </button>
+        </div>
+
+        <div class="invoice-document">
+            <div class="invoice-doc-header">
+                <div>
+                    <h1><i class="fas fa-dumbbell"></i> Fitness Hub</h1>
+                    <p>Gym Management System</p>
+                </div>
+                <div class="invoice-doc-info">
+                    <h2>INVOICE</h2>
+                    <p th:text="${invoice.invoiceNumber}">INV-123456</p>
+                </div>
+            </div>
+
+            <div class="invoice-doc-details">
+                <div class="invoice-doc-section">
+                    <h3>Bill To:</h3>
+                    <p><strong th:text="${invoice.member.user.firstName + ' ' + invoice.member.user.lastName}">Member Name</strong></p>
+                    <p th:text="${invoice.member.user.email}">member@email.com</p>
+                </div>
+                <div class="invoice-doc-section">
+                    <h3>Invoice Details:</h3>
+                    <p><strong>Date:</strong> <span th:text="${#temporals.format(invoice.issuedDate, 'MMM dd, yyyy')}">Jan 01, 2024</span></p>
+                    <p><strong>Status:</strong> 
+                        <span class="status-badge" th:classappend="${invoice.status.name() == 'PAID' ? 'status-completed' : (invoice.status.name() == 'ISSUED' ? 'status-pending' : 'status-cancelled')}">
+                            <span th:text="${invoice.status.name()}">PAID</span>
+                        </span>
+                    </p>
+                    <p><strong>Payment Method:</strong> <span th:text="${invoice.payment.method}">CARD</span></p>
+                </div>
+            </div>
+
+            <div class="invoice-doc-items">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Description</th>
+                            <th>Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td th:text="${invoice.description}">Service description</td>
+                            <td>$<span th:text="${#numbers.formatDecimal(invoice.totalAmount - invoice.taxAmount, 1, 2)}">0.00</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="invoice-doc-totals">
+                <div class="total-row">
+                    <span>Subtotal:</span>
+                    <span>$<span th:text="${#numbers.formatDecimal(invoice.totalAmount - invoice.taxAmount, 1, 2)}">0.00</span></span>
+                </div>
+                <div class="total-row">
+                    <span>Tax (10%):</span>
+                    <span>$<span th:text="${#numbers.formatDecimal(invoice.taxAmount, 1, 2)}">0.00</span></span>
+                </div>
+                <div class="total-row grand-total">
+                    <span>Total Amount:</span>
+                    <span>$<span th:text="${#numbers.formatDecimal(invoice.totalAmount, 1, 2)}">0.00</span></span>
+                </div>
+            </div>
+
+            <div class="invoice-doc-footer">
+                <p>Thank you for your business!</p>
+                <p class="small-text">This is a computer-generated invoice and does not require a signature.</p>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

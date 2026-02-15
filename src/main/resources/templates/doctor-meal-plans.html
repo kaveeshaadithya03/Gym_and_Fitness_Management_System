@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doctor's Meal Plans</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<nav th:replace="~{fragments-navbar :: navbar('DOCTOR')}"></nav>
+
+<div class="container">
+    <div class="dashboard-header">
+        <h2>My Meal Plans</h2>
+        <a th:href="@{/meal-plans/create}" class="btn-primary">Create New Meal Plan</a>
+    </div>
+
+    <div th:if="${mealPlans != null && mealPlans.size() > 0}" class="plans-grid">
+        <div th:each="plan : ${mealPlans}" class="plan-card">
+            <h4 th:text="${plan.title}">Plan Title</h4>
+            <p th:text="'Member: ' + ${plan.member.user.firstName} + ' ' + ${plan.member.user.lastName}">Member</p>
+            <p th:text="'Calories: ' + ${plan.caloriesPerDay} + ' kcal/day'">Calories</p>
+            <p th:text="'Meals: ' + ${plan.items.size()}">Meal Items</p>
+            <p th:text="${plan.description}">Description</p>
+            <div class="card-actions">
+                <a th:href="@{/meal-plans/{planId}(planId=${plan.id})}" class="btn-secondary">View Details</a>
+                <form th:action="@{/meal-plans/{planId}/delete(planId=${plan.id})}" method="post" style="display:inline;">
+                    <button type="submit" class="btn-danger" onclick="return confirm('Are you sure?')">Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div th:if="${mealPlans == null || mealPlans.size() == 0}" class="empty-state">
+        <p>No meal plans created yet.</p>
+        <a th:href="@{/meal-plans/create}" class="btn-primary">Create First Meal Plan</a>
+    </div>
+</div>
+
+</body>
+</html>

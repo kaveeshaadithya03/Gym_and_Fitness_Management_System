@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Browse Doctors - Fitness Hub</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+</head>
+<body>
+    <div th:replace="~{fragments-navbar :: navbar('MEMBER')}"></div>
+
+    <main class="dashboard">
+        <div class="dashboard-card">
+            <h1><i class="fas fa-stethoscope"></i> Browse Doctors</h1>
+            <p>Find qualified doctors for medical consultations and nutrition planning.</p>
+        </div>
+
+        <div th:if="${doctors != null and !doctors.empty}">
+            <div class="professionals-grid">
+                <div th:each="doctor : ${doctors}" class="professional-card">
+                    <div class="professional-header">
+                        <div class="professional-avatar">
+                            <i class="fas fa-user-md"></i>
+                        </div>
+                        <div class="professional-info">
+                            <h3 th:text="${doctor.user.username}">Doctor Name</h3>
+                            <p class="specialization" th:text="${doctor.specialization}">Specialization</p>
+                            <div class="rating" th:if="${doctor.overallRating != null}">
+                                <span th:each="i : ${#numbers.sequence(1, 5)}" 
+                                      th:class="${i <= doctor.overallRating} ? 'star filled' : 'star'"
+                                      class="star">★</span>
+                                <span class="rating-text" th:text="${doctor.overallRating}">4.5</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="professional-body">
+                        <p th:text="${doctor.consultationNotes}" th:if="${doctor.consultationNotes}">Doctor consultation notes and experience</p>
+                        <div class="professional-meta">
+                            <span th:if="${doctor.consultationFee}">
+                                <i class="fas fa-dollar-sign"></i> 
+                                $<span th:text="${#numbers.formatDecimal(doctor.consultationFee, 1, 2)}">50.00</span>/consultation
+                            </span>
+                        </div>
+                    </div>
+                    <div class="professional-actions">
+                        <a th:href="@{/doctor/profile/view/{id}(id=${doctor.id})}" class="btn btn-outline">
+                            <i class="fas fa-eye"></i>
+                            <span>View Profile</span>
+                        </a>
+                        <a th:href="@{/bookings/create?doctorId={id}(id=${doctor.id})}" class="btn btn-primary">
+                            <i class="fas fa-calendar-plus"></i>
+                            <span>Book Consultation</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div th:if="${doctors == null or doctors.empty}" class="empty-state">
+            <div class="empty-state-icon">👨‍⚕️</div>
+            <div class="empty-state-text">No Doctors Available</div>
+            <p>There are currently no doctors available. Please check back later.</p>
+            <a th:href="@{/member/dashboard}" class="btn btn-primary">
+                <i class="fas fa-arrow-left"></i>
+                <span>Back to Dashboard</span>
+            </a>
+        </div>
+    </main>
+
+    <script th:src="@{/js/main.js}"></script>
+</body>
+</html>

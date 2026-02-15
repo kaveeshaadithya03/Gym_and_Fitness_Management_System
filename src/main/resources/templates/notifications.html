@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notifications - Fitness Hub</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+</head>
+<body>
+<div th:replace="~{fragments-navbar :: navbar('MEMBER')}"></div>
+
+<div class="container">
+    <div class="page-header">
+        <h1><i class="fas fa-bell"></i> Notifications</h1>
+        <form th:action="@{/notifications/read-all}" method="post" style="display:inline;">
+            <button type="submit" class="btn btn-secondary" th:if="${unreadCount > 0}">
+                <i class="fas fa-check-double"></i> Mark All as Read
+            </button>
+        </form>
+    </div>
+
+    <div th:if="${notifications.isEmpty()}" class="empty-state">
+        <i class="fas fa-bell-slash"></i>
+        <p>No notifications yet</p>
+    </div>
+
+    <div class="notifications-list" th:unless="${notifications.isEmpty()}">
+        <div th:each="notification : ${notifications}" 
+             th:class="${notification.read ? 'notification-item read' : 'notification-item unread'}">
+            <div class="notification-content">
+                <i class="fas fa-info-circle notification-icon"></i>
+                <div class="notification-text">
+                    <p th:text="${notification.message}">Notification message</p>
+                    <small class="notification-time" 
+                           th:text="${#temporals.format(notification.createdAt, 'MMM dd, yyyy HH:mm')}">
+                        Jan 01, 2024 10:00
+                    </small>
+                </div>
+            </div>
+            <form th:action="@{/notifications/{id}/read(id=${notification.id})}" 
+                  method="post" 
+                  th:if="${!notification.read}">
+                <button type="submit" class="btn-icon" title="Mark as read">
+                    <i class="fas fa-check"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+</body>
+</html>

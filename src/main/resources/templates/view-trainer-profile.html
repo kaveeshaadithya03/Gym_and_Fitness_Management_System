@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trainer Profile - Fitness Hub</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+</head>
+<body>
+<div th:replace="~{fragments-navbar :: navbar('MEMBER')}"></div>
+
+<main class="dashboard">
+    <section class="dashboard-card" th:if="${trainer != null}">
+        <div class="profile-header">
+            <h2><i class="fas fa-dumbbell"></i> <span th:text="${trainer.user.username}">Trainer Name</span></h2>
+            <div class="rating" th:if="${trainer.overallRating != null}">
+                <span class="rating-value" th:text="${#numbers.formatDecimal(trainer.overallRating, 1, 1)}">4.5</span>
+                <span class="stars">⭐</span>
+            </div>
+        </div>
+        
+        <div class="profile-info">
+            <div class="info-grid">
+                <div class="info-item">
+                    <strong>Specialization:</strong>
+                    <p th:text="${trainer.specialization}">Strength Training</p>
+                </div>
+                <div class="info-item" th:if="${trainer.location}">
+                    <strong>Location:</strong>
+                    <p th:text="${trainer.location}">Location</p>
+                </div>
+                <div class="info-item">
+                    <strong>Hourly Rate:</strong>
+                    <p th:text="'$' + ${#numbers.formatDecimal(trainer.hourlyRate, 1, 2)}">$50.00</p>
+                </div>
+                <div class="info-item">
+                    <strong>Status:</strong>
+                    <span th:class="'status status-' + ${trainer.approvalStatus.name().toLowerCase()}" th:text="${trainer.approvalStatus}">Approved</span>
+                </div>
+            </div>
+            
+            <div class="info-item" th:if="${trainer.bio}">
+                <strong>About & Certifications:</strong>
+                <p th:text="${trainer.bio}">Bio and certifications</p>
+            </div>
+        </div>
+
+        <div class="actions">
+            <a th:href="@{/bookings/create(trainerId=${trainer.id})}" class="btn btn-primary">
+                <i class="fas fa-calendar-plus"></i> Book Session
+            </a>
+            <a th:href="@{/browse/trainers}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Trainers
+            </a>
+        </div>
+    </section>
+
+    <section class="dashboard-card" th:if="${trainer == null}">
+        <h2><i class="fas fa-exclamation-triangle"></i> Trainer Not Found</h2>
+        <p>The trainer profile you're looking for doesn't exist.</p>
+        <a th:href="@{/browse/trainers}" class="btn btn-primary">Browse Trainers</a>
+    </section>
+</main>
+
+<style>
+.profile-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(79, 209, 197, 0.3);
+}
+
+.profile-header h2 {
+    color: #4fd1c5;
+    margin: 0;
+}
+
+.rating {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.rating-value {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #fbbf24;
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.info-item {
+    background: rgba(30, 41, 59, 0.5);
+    padding: 1rem;
+    border-radius: 8px;
+    border: 1px solid rgba(79, 209, 197, 0.2);
+}
+
+.info-item strong {
+    color: #4fd1c5;
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.info-item p {
+    color: #e2e8f0;
+    margin: 0;
+}
+
+.status {
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.status-approved {
+    background: rgba(34, 197, 94, 0.2);
+    color: #22c55e;
+}
+
+.status-pending {
+    background: rgba(255, 152, 0, 0.2);
+    color: #ff9800;
+}
+
+.actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(79, 209, 197, 0.2);
+}
+
+@media (max-width: 768px) {
+    .profile-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+    
+    .actions {
+        flex-direction: column;
+    }
+}
+</style>
+</body>
+</html>

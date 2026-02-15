@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doctor Ratings</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<nav th:replace="~{fragments-navbar :: navbar('DOCTOR')}"></nav>
+
+<div class="container">
+    <h2>Doctor Ratings</h2>
+    
+    <div class="rating-summary">
+        <h3>Average Rating: <span th:text="${#numbers.formatDecimal(avgRating, 1, 2)}">4.5</span> / 5.0</h3>
+        <p th:text="'Total Reviews: ' + ${ratingCount}">Total Reviews</p>
+    </div>
+
+    <div th:if="${ratings != null && ratings.size() > 0}" class="ratings-list">
+        <div th:each="rating : ${ratings}" class="rating-card">
+            <div class="rating-header">
+                <strong th:text="${rating.member.user.firstName} + ' ' + ${rating.member.user.lastName}"></strong>
+                <span class="rating-score" th:text="'★ ' + ${rating.score}"></span>
+            </div>
+            <p th:text="${rating.comment}"></p>
+            <small th:text="'Reviewed on ' + ${#temporals.format(rating.createdAt, 'dd/MM/yyyy')}"></small>
+        </div>
+    </div>
+
+    <div th:if="${ratings == null || ratings.size() == 0}" class="empty-state">
+        <p>No ratings yet.</p>
+    </div>
+
+    <a th:href="@{/doctor/dashboard}" class="btn-secondary">Back</a>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment History - Fitness Hub</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+</head>
+<body>
+    <div th:replace="~{fragments-navbar :: navbar('MEMBER')}"></div>
+
+    <main class="dashboard">
+        <div class="dashboard-card">
+            <h1><i class="fas fa-credit-card"></i> Payment History</h1>
+            <p>View your payment history and manage billing information.</p>
+        </div>
+
+        <div th:if="${payments != null and !payments.empty}">
+            <div class="table-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Description</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="payment : ${payments}">
+                            <td th:text="${#temporals.format(payment.paymentDate, 'MMM dd, yyyy')}">Date</td>
+                            <td th:text="${payment.description}">Payment description</td>
+                            <td class="amount">$<span th:text="${payment.amount}">0.00</span></td>
+                            <td>
+                                <span th:class="'status ' + ${payment.status.name().toLowerCase()}" 
+                                      th:text="${payment.status}">Status</span>
+                            </td>
+                            <td>
+                                <a th:href="@{/payments/{id}(id=${payment.id})}" class="btn btn-sm btn-outline">
+                                    <i class="fas fa-eye"></i> View
+                                </a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div th:if="${payments == null or payments.empty}" class="empty-state">
+            <div class="empty-state-icon">💳</div>
+            <div class="empty-state-text">No Payment History</div>
+            <p>You haven't made any payments yet. Your payment history will appear here once you book sessions.</p>
+            <a th:href="@{/browse/trainers}" class="btn btn-primary">
+                <i class="fas fa-calendar-plus"></i> Book a Session
+            </a>
+        </div>
+    </main>
+
+    <script th:src="@{/js/main.js}"></script>
+</body>
+</html>

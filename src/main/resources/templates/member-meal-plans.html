@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Meal Plans - Fitness Hub</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+</head>
+<body>
+<div th:replace="~{fragments-navbar :: navbar('MEMBER')}"></div>
+
+<main class="dashboard">
+    <section class="dashboard-card">
+        <h2><i class="fas fa-utensils"></i> My Meal Plans</h2>
+        <p>Your personalized nutrition plans created by our doctors</p>
+    </section>
+
+    <div th:if="${mealPlans.empty}" class="dashboard-card">
+        <div class="empty-state">
+            <div class="empty-state-icon">🥗</div>
+            <div class="empty-state-text">No meal plans yet</div>
+            <p>Your personalized meal plans will appear here once created by a doctor.</p>
+        </div>
+    </div>
+
+    <div th:unless="${mealPlans.empty}" class="meal-plans-grid">
+        <div th:each="plan : ${mealPlans}" class="meal-plan-card">
+            <div class="plan-header">
+                <h3 th:text="${plan.title}">Plan Title</h3>
+                <span class="calories" th:text="${plan.caloriesPerDay + ' cal/day'}">2000 cal/day</span>
+            </div>
+            
+            <div class="plan-info">
+                <p th:if="${plan.description}" th:text="${plan.description}">Plan description</p>
+                <p><i class="fas fa-user-md"></i> <strong>Doctor:</strong> 
+                   <span th:text="${plan.doctor.user.firstName + ' ' + plan.doctor.user.lastName}">Doctor Name</span>
+                </p>
+                <p><i class="fas fa-list"></i> <strong>Meals:</strong> 
+                   <span th:text="${plan.items.size()} + ' items'">0 items</span>
+                </p>
+            </div>
+
+            <div class="plan-actions">
+                <a th:href="@{/meal-plans/{id}(id=${plan.id})}" class="btn btn-primary">
+                    <i class="fas fa-eye"></i> View Details
+                </a>
+            </div>
+        </div>
+    </div>
+</main>
+
+<style>
+.meal-plans-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+.meal-plan-card {
+    background: rgba(15, 23, 42, 0.8);
+    border: 1px solid rgba(79, 209, 197, 0.3);
+    border-radius: 12px;
+    padding: 1.5rem;
+    transition: all 0.3s ease;
+}
+
+.meal-plan-card:hover {
+    border-color: #4fd1c5;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(79, 209, 197, 0.2);
+}
+
+.plan-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(79, 209, 197, 0.2);
+}
+
+.plan-header h3 {
+    color: #4fd1c5;
+    margin: 0;
+}
+
+.calories {
+    background: rgba(34, 197, 94, 0.2);
+    color: #22c55e;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.plan-info p {
+    margin: 0.5rem 0;
+    color: #e2e8f0;
+}
+
+.plan-actions {
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(79, 209, 197, 0.2);
+}
+</style>
+</body>
+</html>

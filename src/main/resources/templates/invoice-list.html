@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoices - Fitness Hub</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+</head>
+<body>
+<div th:replace="~{fragments-navbar :: navbar('MEMBER')}"></div>
+
+<div class="container">
+    <div class="page-header">
+        <h1><i class="fas fa-file-invoice"></i> My Invoices</h1>
+        <a th:href="@{/payments/member}" class="btn btn-secondary">
+            <i class="fas fa-credit-card"></i> Payment History
+        </a>
+    </div>
+
+    <div th:if="${invoices.isEmpty()}" class="empty-state">
+        <i class="fas fa-file-invoice-dollar"></i>
+        <p>No invoices yet</p>
+    </div>
+
+    <div class="invoice-grid" th:unless="${invoices.isEmpty()}">
+        <div class="invoice-card" th:each="invoice : ${invoices}">
+            <div class="invoice-header">
+                <div>
+                    <h3 th:text="${invoice.invoiceNumber}">INV-123456</h3>
+                    <p class="invoice-date" th:text="${#temporals.format(invoice.issuedDate, 'MMM dd, yyyy')}">Jan 01, 2024</p>
+                </div>
+                <span class="status-badge" th:classappend="${invoice.status.name() == 'PAID' ? 'status-completed' : (invoice.status.name() == 'ISSUED' ? 'status-pending' : 'status-cancelled')}">
+                    <span th:text="${invoice.status.name()}">PAID</span>
+                </span>
+            </div>
+            <div class="invoice-body">
+                <p class="invoice-description" th:text="${invoice.description}">Payment description</p>
+                <div class="invoice-amounts">
+                    <div class="amount-row">
+                        <span>Subtotal:</span>
+                        <span>$<span th:text="${#numbers.formatDecimal(invoice.totalAmount - invoice.taxAmount, 1, 2)}">0.00</span></span>
+                    </div>
+                    <div class="amount-row">
+                        <span>Tax:</span>
+                        <span>$<span th:text="${#numbers.formatDecimal(invoice.taxAmount, 1, 2)}">0.00</span></span>
+                    </div>
+                    <div class="amount-row total">
+                        <span>Total:</span>
+                        <span>$<span th:text="${#numbers.formatDecimal(invoice.totalAmount, 1, 2)}">0.00</span></span>
+                    </div>
+                </div>
+            </div>
+            <div class="invoice-footer">
+                <a th:href="@{/payments/invoices/{id}(id=${invoice.id})}" class="btn btn-sm">
+                    <i class="fas fa-eye"></i> View Details
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

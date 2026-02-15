@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Ratings - Fitness Hub</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+</head>
+<body>
+<div th:replace="~{fragments-navbar :: navbar('TRAINER')}"></div>
+
+<main class="dashboard">
+    <section class="dashboard-card">
+        <h2><i class="fas fa-star"></i> My Ratings & Feedback</h2>
+
+        <div th:if="${ratings.empty}" class="empty-state">
+            <div class="empty-state-icon">⭐</div>
+            <div class="empty-state-text">No ratings yet</div>
+            <p>Your client feedback and ratings will appear here.</p>
+        </div>
+
+        <div th:unless="${ratings.empty}" class="ratings-list">
+            <div th:each="rating : ${ratings}" class="rating-card">
+                <div class="rating-header">
+                    <div class="stars">
+                        <span th:each="i : ${#numbers.sequence(1, rating.score)}" class="star filled">★</span>
+                        <span th:each="i : ${#numbers.sequence(rating.score + 1, 5)}" class="star">☆</span>
+                    </div>
+                    <span class="rating-value" th:text="${rating.score} + '/5'">5/5</span>
+                </div>
+                <p th:if="${rating.comment}" th:text="${rating.comment}">Great trainer!</p>
+                <p><strong>From:</strong> <span th:text="${rating.member.user.firstName + ' ' + rating.member.user.lastName}">Member Name</span></p>
+                <small th:text="${#temporals.format(rating.createdAt, 'MMM dd, yyyy')}">Date</small>
+            </div>
+        </div>
+    </section>
+</main>
+</body>
+</html>

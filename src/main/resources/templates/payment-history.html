@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment History - Fitness Hub</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+</head>
+<body>
+<div th:replace="~{fragments-navbar :: navbar('MEMBER')}"></div>
+
+<div class="container">
+    <div class="page-header">
+        <h1><i class="fas fa-credit-card"></i> Payment History</h1>
+        <a th:href="@{/payments/invoices}" class="btn btn-secondary">
+            <i class="fas fa-file-invoice"></i> View Invoices
+        </a>
+    </div>
+
+    <div th:if="${param.payment != null and param.payment[0] == 'success'}" class="alert alert-success">
+        <i class="fas fa-check-circle"></i> Payment recorded successfully!
+    </div>
+
+    <div th:if="${payments.isEmpty()}" class="empty-state">
+        <i class="fas fa-receipt"></i>
+        <p>No payment history yet</p>
+    </div>
+
+    <div class="table-container" th:unless="${payments.isEmpty()}">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Type</th>
+                    <th>Amount</th>
+                    <th>Method</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="payment : ${payments}">
+                    <td th:text="${#temporals.format(payment.dateTime, 'MMM dd, yyyy HH:mm')}">Jan 01, 2024 10:00</td>
+                    <td>
+                        <span class="badge" th:classappend="${payment.paymentType.name() == 'MEMBERSHIP' ? 'badge-primary' : (payment.paymentType.name() == 'SESSION' ? 'badge-info' : 'badge-warning')}">
+                            <i class="fas" th:classappend="${payment.paymentType.name() == 'MEMBERSHIP' ? 'fa-id-card' : (payment.paymentType.name() == 'SESSION' ? 'fa-dumbbell' : 'fa-stethoscope')}"></i>
+                            <span th:text="${payment.paymentType.name()}">TYPE</span>
+                        </span>
+                    </td>
+                    <td class="amount">$<span th:text="${#numbers.formatDecimal(payment.amount, 1, 2)}">0.00</span></td>
+                    <td th:text="${payment.method}">CARD</td>
+                    <td>
+                        <span class="status-badge" th:classappend="${payment.status.name() == 'PAID' ? 'status-completed' : (payment.status.name() == 'PENDING' ? 'status-pending' : 'status-cancelled')}">
+                            <span th:text="${payment.status.name()}">PAID</span>
+                        </span>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+</body>
+</html>

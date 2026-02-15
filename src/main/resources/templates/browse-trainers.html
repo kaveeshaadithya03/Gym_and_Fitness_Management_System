@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Browse Trainers - Fitness Hub</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+</head>
+<body>
+<div th:replace="~{fragments-navbar :: navbar('MEMBER')}"></div>
+
+<main class="dashboard">
+    <div class="dashboard-card">
+        <h1><i class="fas fa-dumbbell"></i> Browse Trainers</h1>
+        <p>Find the perfect trainer for your fitness journey.</p>
+    </div>
+
+    <div th:if="${trainers != null and !trainers.empty}">
+        <div class="professionals-grid">
+            <div th:each="trainer : ${trainers}" class="professional-card">
+                <div class="professional-header">
+                    <div class="professional-avatar">
+                        <i class="fas fa-dumbbell"></i>
+                    </div>
+                    <div class="professional-info">
+                        <h3 th:text="${trainer.user.username}">Trainer Name</h3>
+                        <p class="specialization" th:text="${trainer.specialization}">Specialization</p>
+                        <div class="rating" th:if="${trainer.overallRating != null}">
+                            <span th:each="i : ${#numbers.sequence(1, 5)}" 
+                                  th:class="${i <= trainer.overallRating} ? 'star filled' : 'star'"
+                                  class="star">★</span>
+                            <span class="rating-text" th:text="${#numbers.formatDecimal(trainer.overallRating, 1, 1)}">4.5</span>
+                        </div>
+                        <div class="rating" th:if="${trainer.overallRating == null}">
+                            <span class="rating-text" style="color: #ffaa00;">New Trainer</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="professional-body">
+                    <p th:text="${trainer.bio}" th:if="${trainer.bio != null and !#strings.isEmpty(trainer.bio)}">Trainer bio and experience</p>
+                    <p th:if="${trainer.bio == null or #strings.isEmpty(trainer.bio)}" style="color: #888; font-style: italic;">No bio available</p>
+                    <div class="professional-meta">
+                        <span th:if="${trainer.location}">
+                            <i class="fas fa-map-marker-alt"></i> 
+                            <span th:text="${trainer.location}">Location</span>
+                        </span>
+                        <span th:if="${trainer.hourlyRate}">
+                            <i class="fas fa-dollar-sign"></i> 
+                            $<span th:text="${#numbers.formatDecimal(trainer.hourlyRate, 1, 2)}">50.00</span>/hour
+                        </span>
+                    </div>
+                </div>
+                <div class="professional-actions">
+                    <a th:href="@{/trainer/profile/view/{id}(id=${trainer.id})}" class="btn btn-outline">
+                        <i class="fas fa-eye"></i>
+                        <span>View Profile</span>
+                    </a>
+                    <a th:href="@{/bookings/create?trainerId={id}(id=${trainer.id})}" class="btn btn-primary">
+                        <i class="fas fa-calendar-plus"></i>
+                        <span>Book Session</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div th:if="${trainers == null or trainers.empty}" class="empty-state">
+        <div class="empty-state-icon">🏋️</div>
+        <div class="empty-state-text">No Trainers Available</div>
+        <p>There are currently no trainers available. Please check back later.</p>
+        <a th:href="@{/member/dashboard}" class="btn btn-primary">
+            <i class="fas fa-arrow-left"></i>
+            <span>Back to Dashboard</span>
+        </a>
+    </div>
+</main>
+
+<script th:src="@{/js/main.js}"></script>
+</body>
+</html>

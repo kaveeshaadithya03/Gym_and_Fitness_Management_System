@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+</head>
+<body>
+<th:block th:fragment="navbar(role)">
+    <nav class="top-nav">
+        <div class="brand">
+            <i class="fas fa-dumbbell"></i> Fitness Hub
+        </div>
+        <ul class="nav-links">
+            <li><a th:href="@{/dashboard}"><i class="fas fa-home"></i> Home</a></li>
+
+            <li th:if="${role == 'MEMBER'}">
+                <a th:href="@{/member/bookings}"><i class="fas fa-calendar-check"></i> Bookings</a>
+            </li>
+            <li th:if="${role == 'MEMBER'}">
+                <a th:href="@{/meal-plans/member}"><i class="fas fa-utensils"></i> Meal Plans</a>
+            </li>
+
+            <li th:if="${role == 'TRAINER'}">
+                <a th:href="@{/trainer/bookings}"><i class="fas fa-users"></i> My Sessions</a>
+            </li>
+
+            <li th:if="${role == 'DOCTOR'}">
+                <a th:href="@{/doctor/bookings}"><i class="fas fa-stethoscope"></i> Consultations</a>
+            </li>
+            <li th:if="${role == 'DOCTOR'}">
+                <a th:href="@{/meal-plans/create}"><i class="fas fa-plus-circle"></i> New Meal Plan</a>
+            </li>
+
+            <li>
+                <a th:href="@{/notifications}" class="notification-link">
+                    <i class="fas fa-bell"></i>
+                    <span class="notification-badge" 
+                          th:if="${unreadNotificationCount != null and unreadNotificationCount > 0}"
+                          th:text="${unreadNotificationCount}">0</span>
+                </a>
+            </li>
+
+            <li>
+                <form th:action="@{/logout}" method="post" style="display:inline;">
+                    <button type="submit" class="btn-link"><i class="fas fa-sign-out-alt"></i> Logout</button>
+                </form>
+            </li>
+        </ul>
+    </nav>
+</th:block>
+</body>
+</html>
